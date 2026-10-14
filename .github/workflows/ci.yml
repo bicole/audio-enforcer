@@ -1,0 +1,25 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-test-package:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet restore AudioEnforcer.sln
+      - run: dotnet test AudioEnforcer.sln -c Release --no-restore --logger trx --results-directory TestResults
+      - name: Publish app and build MSI
+        shell: pwsh
+        run: ./build.ps1 -SkipTests -Version 0.1.0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AudioEnforcer-unsigned-msi
+          path: artifacts/installer/*.msi

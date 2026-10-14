@@ -1,0 +1,12 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Audio Enforcer" Manufacturer="Bryan Cole" Version="$(var.ProductVersion)" UpgradeCode="6F49F047-D658-49EC-B34F-491A26C84C02" Language="1033" Scope="perUser" InstallerVersion="500">
+    <SummaryInformation Description="Keeps preferred Windows playback and recording devices selected." />
+    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." /><MediaTemplate EmbedCab="yes" />
+    <StandardDirectory Id="LocalAppDataFolder"><Directory Id="INSTALLFOLDER" Name="AudioEnforcer"><Component Id="ApplicationFiles" Guid="2B67DBA3-7912-429A-8168-263E97224365"><File Id="AudioEnforcerExe" Source="$(var.PublishDir)\AudioEnforcer.exe" KeyPath="yes" /></Component></Directory></StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder"><Directory Id="ApplicationProgramsFolder" Name="Audio Enforcer"><Component Id="ApplicationShortcut" Guid="77780605-BE19-4A54-9E5E-B035F22661C3"><Shortcut Id="StartMenuShortcut" Name="Audio Enforcer" Target="[INSTALLFOLDER]AudioEnforcer.exe" WorkingDirectory="INSTALLFOLDER" /><RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" /><RegistryValue Root="HKCU" Key="Software\AudioEnforcer" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" /></Component></Directory></StandardDirectory>
+    <Component Id="AutoStart" Directory="INSTALLFOLDER" Guid="D48A0E56-7096-40B5-8355-179BF27A8494"><RegistryValue Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="Audio Enforcer" Type="string" Value="&quot;[INSTALLFOLDER]AudioEnforcer.exe&quot; --startup" KeyPath="yes" /></Component>
+    <Feature Id="Complete" Title="Audio Enforcer" Level="1"><ComponentRef Id="ApplicationFiles" /><ComponentRef Id="ApplicationShortcut" /><ComponentRef Id="AutoStart" /></Feature>
+    <CustomAction Id="LaunchApplication" FileRef="AudioEnforcerExe" Execute="immediate" Return="asyncNoWait" Impersonate="yes" />
+    <InstallExecuteSequence><Custom Action="LaunchApplication" After="InstallFinalize" Condition="NOT Installed AND UILevel &gt;= 4" /></InstallExecuteSequence>
+  </Package>
+</Wix>

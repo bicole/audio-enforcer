@@ -1,0 +1,29 @@
+name: Build release candidate
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: SemVer release version
+        required: true
+        default: 0.1.0
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build and test
+        shell: pwsh
+        run: ./build.ps1 -Version '${{ inputs.version }}'
+      - name: Hash installer
+        shell: pwsh
+        run: Get-FileHash artifacts/installer/*.msi -Algorithm SHA256 | Format-List
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AudioEnforcer-${{ inputs.version }}-unsigned
+          path: artifacts/installer/*.msi
+# Deliberately does not publish a GitHub release.
