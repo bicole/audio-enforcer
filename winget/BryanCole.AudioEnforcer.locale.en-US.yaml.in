@@ -1,0 +1,17 @@
+PackageIdentifier: BryanCole.AudioEnforcer
+PackageVersion: VERSION
+PackageLocale: en-US
+Publisher: Bryan Cole
+PackageName: Audio Enforcer
+License: MIT
+ShortDescription: Keeps preferred Windows playback and recording devices selected.
+Description: Applies selected default speakers or headset and microphone at sign-in and on demand.
+PackageUrl: https://github.com/bicole/audio-enforcer
+LicenseUrl: https://github.com/bicole/audio-enforcer/blob/vVERSION/LICENSE
+Tags:
+  - audio
+  - microphone
+  - speakers
+  - windows
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
