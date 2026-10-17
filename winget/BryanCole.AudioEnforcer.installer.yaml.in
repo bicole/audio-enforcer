@@ -1,11 +1,11 @@
-# Replace VERSION and SHA256 after publishing an approved installer.
+# VERSION, SHA256, and INSTALLER_URL are replaced by scripts/New-WinGetManifest.ps1.
 PackageIdentifier: BryanCole.AudioEnforcer
 PackageVersion: VERSION
 InstallerType: wix
 Scope: user
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/bicole/audio-enforcer/releases/download/vVERSION/AudioEnforcer-VERSION-x64.msi
+    InstallerUrl: INSTALLER_URL
     InstallerSha256: SHA256
     InstallerSwitches:
       Silent: /qn
