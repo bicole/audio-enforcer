@@ -1,25 +1,70 @@
-name: CI
+name: PR validation
+
 on:
-  push:
-    branches: [ main ]
   pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
   workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-test-package:
+  quality-gate:
+    name: Quality gate
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.0.x
-      - run: dotnet restore AudioEnforcer.sln
-      - run: dotnet test AudioEnforcer.sln -c Release --no-restore --logger trx --results-directory TestResults
-      - name: Publish app and build MSI
+      - name: Restore
+        run: dotnet restore AudioEnforcer.sln
+      - name: Verify formatting
+        shell: pwsh
+        run: |
+          dotnet format AudioEnforcer.sln --no-restore --verbosity diagnostic
+          if ($LASTEXITCODE -ne 0) {
+            throw "dotnet format failed with exit code $LASTEXITCODE."
+          }
+          git diff --check
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Formatting introduced whitespace errors.'
+          }
+          $diff = git status --short
+          if ($diff) {
+            Write-Host 'dotnet format would change the following files:'
+            git diff --stat
+            git diff -- . ':(exclude)*.sln'
+            throw 'Run `dotnet format AudioEnforcer.sln` locally and commit the results.'
+          }
+      - name: Test
+        run: dotnet test AudioEnforcer.sln -c Release --no-restore --logger trx --results-directory TestResults
+      - name: Build MSI
         shell: pwsh
         run: ./build.ps1 -SkipTests -Version 0.1.0
-      - uses: actions/upload-artifact@v4
+      - name: Smoke-test manifest generation
+        shell: pwsh
+        run: |
+          $msi = Get-ChildItem artifacts/installer/*.msi | Select-Object -First 1
+          ./scripts/New-WinGetManifest.ps1 -Version 0.1.0 -InstallerPath $msi.FullName -InstallerUrl "https://example.invalid/$($msi.Name)" -OutputDirectory artifacts/winget-smoke
+          if (Get-ChildItem artifacts/winget-smoke/*.yaml | Select-String -Pattern 'VERSION|SHA256|INSTALLER_URL') {
+            throw 'Unresolved WinGet template token.'
+          }
+      - uses: actions/upload-artifact@v5
+        if: always()
         with:
-          name: AudioEnforcer-unsigned-msi
-          path: artifacts/installer/*.msi
+          name: AudioEnforcer-CI
+          path: |
+            artifacts/installer/*.msi
+            artifacts/winget-smoke/*.yaml
+            TestResults/*.trx
+          if-no-files-found: warn

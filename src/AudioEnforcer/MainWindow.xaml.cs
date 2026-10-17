@@ -51,8 +51,10 @@ public partial class MainWindow : Window
         }
         _settings.Save(new AudioEnforcerSettings
         {
-            PlaybackDeviceId = playback.Id, PlaybackDeviceName = playback.Name,
-            RecordingDeviceId = recording.Id, RecordingDeviceName = recording.Name
+            PlaybackDeviceId = playback.Id,
+            PlaybackDeviceName = playback.Name,
+            RecordingDeviceId = recording.Id,
+            RecordingDeviceName = recording.Name
         });
         SetStatus(_enforcement.Apply());
     }
