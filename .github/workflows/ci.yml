@@ -20,14 +20,32 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.0.x
       - name: Restore
         run: dotnet restore AudioEnforcer.sln
       - name: Verify formatting
-        run: dotnet format AudioEnforcer.sln --verify-no-changes --no-restore
+        shell: pwsh
+        run: |
+          dotnet format AudioEnforcer.sln --no-restore --verbosity diagnostic
+          if ($LASTEXITCODE -ne 0) {
+            throw "dotnet format failed with exit code $LASTEXITCODE."
+          }
+          git diff --check
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Formatting introduced whitespace errors.'
+          }
+          $diff = git status --short
+          if ($diff) {
+            Write-Host 'dotnet format would change the following files:'
+            git diff --stat
+            git diff -- . ':(exclude)*.sln'
+            throw 'Run `dotnet format AudioEnforcer.sln` locally and commit the results.'
+          }
       - name: Test
         run: dotnet test AudioEnforcer.sln -c Release --no-restore --logger trx --results-directory TestResults
       - name: Build MSI
@@ -41,7 +59,7 @@ jobs:
           if (Get-ChildItem artifacts/winget-smoke/*.yaml | Select-String -Pattern 'VERSION|SHA256|INSTALLER_URL') {
             throw 'Unresolved WinGet template token.'
           }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: AudioEnforcer-CI
