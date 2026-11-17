@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using AudioEnforcer.Core;
+using Color = System.Windows.Media.Color;
 
 namespace AudioEnforcer;
 

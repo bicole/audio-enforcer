@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace AudioEnforcer.Infrastructure;
 
 public sealed class AppPaths
