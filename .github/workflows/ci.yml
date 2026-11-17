@@ -56,7 +56,7 @@ jobs:
         run: |
           $msi = Get-ChildItem artifacts/installer/*.msi | Select-Object -First 1
           ./scripts/New-WinGetManifest.ps1 -Version 0.1.0 -InstallerPath $msi.FullName -InstallerUrl "https://example.invalid/$($msi.Name)" -OutputDirectory artifacts/winget-smoke
-          if (Get-ChildItem artifacts/winget-smoke/*.yaml | Select-String -Pattern 'VERSION|SHA256|INSTALLER_URL') {
+          if (Get-ChildItem artifacts/winget-smoke/*.yaml | Select-String -CaseSensitive -Pattern 'VERSION|SHA256|INSTALLER_URL') {
             throw 'Unresolved WinGet template token.'
           }
       - uses: actions/upload-artifact@v5

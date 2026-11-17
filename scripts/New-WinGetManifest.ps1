@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $templateDirectory = Join-Path $root 'winget'
-New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+$resolvedOutputDirectory = (New-Item -ItemType Directory -Path $OutputDirectory -Force).FullName
 
 $hash = (Get-FileHash -Path $InstallerPath -Algorithm SHA256).Hash.ToUpperInvariant()
 $templates = @(Get-ChildItem -Path $templateDirectory -Filter '*.yaml.in')
@@ -20,11 +20,11 @@ if ($templates.Count -ne 3) {
 foreach ($template in $templates) {
     $content = Get-Content -Path $template.FullName -Raw
     $content = $content.Replace('INSTALLER_URL', $InstallerUrl).Replace('VERSION', $Version).Replace('SHA256', $hash)
-    $destination = Join-Path $OutputDirectory $template.Name.Substring(0, $template.Name.Length - 3)
+    $destination = Join-Path $resolvedOutputDirectory $template.Name.Substring(0, $template.Name.Length - 3)
     [IO.File]::WriteAllText($destination, $content, [Text.UTF8Encoding]::new($false))
 }
 
-$unresolved = Get-ChildItem -Path $OutputDirectory -Filter '*.yaml' | Select-String -Pattern 'INSTALLER_URL|VERSION|SHA256'
+$unresolved = Get-ChildItem -Path $resolvedOutputDirectory -Filter '*.yaml' | Select-String -CaseSensitive -Pattern 'INSTALLER_URL|VERSION|SHA256'
 if ($unresolved) {
     throw 'One or more WinGet template tokens were not replaced.'
 }
