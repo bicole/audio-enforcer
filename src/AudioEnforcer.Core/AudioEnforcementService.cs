@@ -39,11 +39,11 @@ public sealed class AudioEnforcementService
                 device.Direction == AudioDirection.Recording &&
                 StringComparer.Ordinal.Equals(device.Id, settings.RecordingDeviceId));
 
-            var missing = new List<string>();
-            if (playback is null) missing.Add($"playback device '{settings.PlaybackDeviceName ?? settings.PlaybackDeviceId}'");
-            if (recording is null) missing.Add($"recording device '{settings.RecordingDeviceName ?? settings.RecordingDeviceId}'");
-            if (missing.Count > 0)
+            if (playback is null || recording is null)
             {
+                var missing = new List<string>();
+                if (playback is null) missing.Add($"playback device '{settings.PlaybackDeviceName ?? settings.PlaybackDeviceId}'");
+                if (recording is null) missing.Add($"recording device '{settings.RecordingDeviceName ?? settings.RecordingDeviceId}'");
                 var message = $"Selected {string.Join(" and ", missing)} is unavailable. Reconnect it and Audio Enforcer will retry.";
                 _logger.Info(message);
                 return new(EnforcementStatus.DeviceUnavailable, message);

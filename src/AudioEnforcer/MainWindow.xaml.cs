@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using AudioEnforcer.Core;
+using Color = System.Windows.Media.Color;
 
 namespace AudioEnforcer;
 
@@ -51,8 +52,10 @@ public partial class MainWindow : Window
         }
         _settings.Save(new AudioEnforcerSettings
         {
-            PlaybackDeviceId = playback.Id, PlaybackDeviceName = playback.Name,
-            RecordingDeviceId = recording.Id, RecordingDeviceName = recording.Name
+            PlaybackDeviceId = playback.Id,
+            PlaybackDeviceName = playback.Name,
+            RecordingDeviceId = recording.Id,
+            RecordingDeviceName = recording.Name
         });
         SetStatus(_enforcement.Apply());
     }

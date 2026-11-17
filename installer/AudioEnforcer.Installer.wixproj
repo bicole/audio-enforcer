@@ -3,5 +3,6 @@
     <OutputType>Package</OutputType><Platform>x64</Platform><InstallerPlatform>x64</InstallerPlatform>
     <OutputName>AudioEnforcer-$(VersionPrefix)-x64</OutputName>
     <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(VersionPrefix)</DefineConstants>
+    <SuppressIces>ICE91</SuppressIces>
   </PropertyGroup>
 </Project>

@@ -4,6 +4,7 @@ using System.Windows;
 using AudioEnforcer.Core;
 using AudioEnforcer.Infrastructure;
 using Forms = System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
 
 namespace AudioEnforcer;
 
